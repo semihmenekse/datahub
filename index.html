@@ -21,16 +21,16 @@
       background: #fff;
       font-size: 18px;
       font-weight: 700;
-      letter-spacing: .3px;
     }
     nav span { color: #6c63ff; }
 
-    .container { max-width: 960px; margin: 48px auto; padding: 0 24px; }
+    .container { max-width: 1100px; margin: 40px auto; padding: 0 24px; }
 
     .controls {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
+      margin-bottom: 24px;
     }
 
     .search-wrap {
@@ -40,7 +40,7 @@
     }
     .search-wrap input {
       width: 100%;
-      padding: 12px 16px 12px 42px;
+      padding: 11px 16px 11px 40px;
       border: 1.5px solid #e0e2ed;
       border-radius: 10px;
       font-size: 14px;
@@ -53,40 +53,30 @@
     .search-wrap input::placeholder { color: #9ca3af; }
     .search-icon {
       position: absolute;
-      left: 13px;
+      left: 12px;
       top: 50%;
       transform: translateY(-50%);
       color: #9ca3af;
-      font-size: 16px;
+      font-size: 15px;
       pointer-events: none;
     }
 
     select {
-      padding: 12px 40px 12px 16px;
+      padding: 11px 40px 11px 14px;
       border: 1.5px solid #e0e2ed;
       border-radius: 10px;
       font-size: 14px;
       color: #1a1d27;
-      background: #fff;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 14px center;
       outline: none;
       cursor: pointer;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      transition: border-color .2s;
       min-width: 200px;
+      transition: border-color .2s;
     }
     select:focus { border-color: #6c63ff; }
 
-    /* ── Results table ── */
-    .results { margin-top: 32px; }
-
-    .result-count {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 12px;
-    }
+    .result-count { font-size: 12px; color: #6b7280; margin-bottom: 10px; }
 
     .table-wrap {
       border: 1px solid #e0e2ed;
@@ -95,7 +85,6 @@
     }
 
     table { width: 100%; border-collapse: collapse; }
-
     thead tr { background: #f5f6fa; }
     th {
       padding: 11px 16px;
@@ -127,9 +116,9 @@
       font-size: 11px;
       font-weight: 600;
     }
-    .badge-subsidiary     { background: #ede9ff; color: #6c63ff; }
-    .badge-planning       { background: #e0f7f3; color: #00897b; }
-    .badge-parent         { background: #fff3e0; color: #d97706; }
+    .badge-yes { background: #e0f7ee; color: #059669; }
+    .badge-no  { background: #fef2f2; color: #e53e3e; }
+    .badge-na  { background: #f3f4f6; color: #6b7280; }
 
     .empty-state {
       text-align: center;
@@ -137,7 +126,6 @@
       color: #9ca3af;
     }
     .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
-    .empty-state p { font-size: 13px; }
 
     footer {
       text-align: center;
@@ -168,22 +156,21 @@
     </select>
   </div>
 
-  <div class="results">
-    <div class="result-count" id="result-count"></div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th onclick="sortBy('name')"    id="th-name">    Name</th>
-            <th onclick="sortBy('type')"    id="th-type">    Type</th>
-            <th onclick="sortBy('region')"  id="th-region">  Region</th>
-            <th onclick="sortBy('code')"    id="th-code">    Code</th>
-            <th onclick="sortBy('notes')"   id="th-notes">   Notes</th>
-          </tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-      </table>
-    </div>
+  <div class="result-count" id="result-count"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortBy('subsidiary')"  id="th-subsidiary"> Subsidiary</th>
+          <th onclick="sortBy('planningEntity')" id="th-planningEntity">Planning Entity</th>
+          <th onclick="sortBy('parent')"       id="th-parent">     Parent</th>
+          <th onclick="sortBy('privateCloud')" id="th-privateCloud">Private Cloud Owner</th>
+          <th onclick="sortBy('comboBase')"    id="th-comboBase">   Owns Combo Base?</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
   </div>
 
 </div>
@@ -191,23 +178,30 @@
 <footer>EntityHub</footer>
 
 <script>
-  const records = [];
+  const records = [
+    { subsidiary: "Sub 1",  planningEntity: "Plan 1",   parent: "Coca Cola", privateCloud: "Plan 1", comboBase: "Yes" },
+    { subsidiary: "Sub 2",  planningEntity: "Plan 2",   parent: "Coca Cola", privateCloud: "Plan 1", comboBase: "No"  },
+    { subsidiary: "Sub 3",  planningEntity: "Plan 3",   parent: "Coca Cola", privateCloud: "Plan 1", comboBase: "No"  },
+    { subsidiary: "Sub 4",  planningEntity: "Plan 4",   parent: "Coca Cola", privateCloud: "Plan 1", comboBase: "No"  },
+    { subsidiary: "ABC 1",  planningEntity: "Entity 1", parent: "Pepsi",     privateCloud: "NA",     comboBase: "Yes" },
+    { subsidiary: "ABC 2",  planningEntity: "Entity 2", parent: "Pepsi",     privateCloud: "NA",     comboBase: "No"  },
+    { subsidiary: "ABC 3",  planningEntity: "Entity 3", parent: "Pepsi",     privateCloud: "NA",     comboBase: "No"  },
+    { subsidiary: "ABC 4",  planningEntity: "Entity 4", parent: "Pepsi",     privateCloud: "NA",     comboBase: "No"  },
+  ];
 
   let sortCol = '';
   let sortDir = 1;
 
-  const BADGE = {
-    'Subsidiary':      'badge-subsidiary',
-    'Planning Entity': 'badge-planning',
-    'Parent':          'badge-parent',
-  };
-
   function filtered() {
-    const q  = document.getElementById('search-input').value.toLowerCase();
-    const t  = document.getElementById('filter-type').value;
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const t = document.getElementById('filter-type').value;
     return records.filter(r => {
       const hay = Object.values(r).join(' ').toLowerCase();
-      return (!q || hay.includes(q)) && (!t || r.type === t);
+      if (q && !hay.includes(q)) return false;
+      if (t === 'Subsidiary')      return r.subsidiary.toLowerCase().includes(q || '');
+      if (t === 'Planning Entity') return r.planningEntity.toLowerCase().includes(q || '');
+      if (t === 'Parent')          return r.parent.toLowerCase().includes(q || '');
+      return true;
     });
   }
 
@@ -220,39 +214,38 @@
     });
   }
 
+  function comboBadge(v) {
+    if (v === 'Yes') return 'badge-yes';
+    if (v === 'No')  return 'badge-no';
+    return 'badge-na';
+  }
+
   function renderTable() {
-    const rows = sorted(filtered());
+    const rows  = sorted(filtered());
     const tbody = document.getElementById('table-body');
     const count = document.getElementById('result-count');
 
-    count.textContent = rows.length
-      ? `${rows.length} result${rows.length !== 1 ? 's' : ''}`
-      : '';
+    count.textContent = rows.length + ' result' + (rows.length !== 1 ? 's' : '');
 
     if (!rows.length) {
-      tbody.innerHTML = `
-        <tr><td colspan="5">
-          <div class="empty-state">
-            <div class="icon">&#128203;</div>
-            <p>No entities found.</p>
-          </div>
-        </td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">&#128203;</div><p>No entities found.</p></div></td></tr>`;
       return;
     }
 
     tbody.innerHTML = rows.map(r => `
       <tr>
-        <td><strong>${esc(r.name)}</strong></td>
-        <td><span class="badge ${BADGE[r.type] || ''}">${esc(r.type)}</span></td>
-        <td>${esc(r.region || '—')}</td>
-        <td>${esc(r.code   || '—')}</td>
-        <td>${esc(r.notes  || '—')}</td>
+        <td><strong>${esc(r.subsidiary)}</strong></td>
+        <td>${esc(r.planningEntity)}</td>
+        <td>${esc(r.parent)}</td>
+        <td>${esc(r.privateCloud)}</td>
+        <td><span class="badge ${comboBadge(r.comboBase)}">${esc(r.comboBase)}</span></td>
       </tr>
     `).join('');
   }
 
   function sortBy(col) {
-    if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
+    sortDir = sortCol === col ? sortDir * -1 : 1;
+    sortCol = col;
     document.querySelectorAll('th').forEach(th => th.className = '');
     const th = document.getElementById('th-' + col);
     if (th) th.className = sortDir === 1 ? 'asc' : 'desc';
@@ -260,9 +253,7 @@
   }
 
   function esc(s) {
-    return String(s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   renderTable();
