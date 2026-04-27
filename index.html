@@ -306,8 +306,8 @@
       <div class="field-label">Entity Type</div>
       <select id="filter-type">
         <option value="">— Select type —</option>
-        <option value="Parent">Parent</option>
-        <option value="Subsidiary">Subsidiary</option>
+        <option value="Parent">Global Ultimate</option>
+        <option value="Subsidiary">Business Partner</option>
         <option value="Planning Entity">Planning Entity</option>
       </select>
     </div>
@@ -336,9 +336,9 @@
   /* ── All searchable names ─────────────────────────────────────────────── */
   const ALL_NAMES = [
     ...new Set([
-      ...DATA.map(r => ({ name: r.parent,         type: 'Parent' })),
-      ...DATA.map(r => ({ name: r.subsidiary,      type: 'Subsidiary' })),
-      ...DATA.map(r => ({ name: r.planningEntity,  type: 'Planning Entity' })),
+      ...DATA.map(r => ({ name: r.parent,         type: 'Parent',         label: 'Global Ultimate' })),
+      ...DATA.map(r => ({ name: r.subsidiary,      type: 'Subsidiary',     label: 'Business Partner' })),
+      ...DATA.map(r => ({ name: r.planningEntity,  type: 'Planning Entity',label: 'Planning Entity' })),
     ].map(JSON.stringify))
   ].map(JSON.parse);
 
@@ -357,7 +357,7 @@
     box.innerHTML = matches.map((m, i) =>
       `<div class="suggestion-item" data-idx="${i}" data-name="${esc(m.name)}" data-type="${esc(m.type)}"
             onclick="pickSuggestion('${esc(m.name)}','${esc(m.type)}')">
-        ${esc(m.name)}<span class="s-type">${esc(m.type)}</span>
+        ${esc(m.name)}<span class="s-type">${esc(m.label || m.type)}</span>
       </div>`
     ).join('');
     box.classList.add('open');
@@ -447,8 +447,8 @@
       const rec = getRecommendation(r);
       return `
       <div class="child-card">
-        <div class="sub-name">${esc(r.subsidiary)}</div>
-        <div class="plan-name">&#9492; ${esc(r.planningEntity)}</div>
+        <div class="sub-name">${esc(r.subsidiary)} <span style="font-size:11px;color:#0070F2;font-weight:400">(Business Partner)</span></div>
+        <div class="plan-name">&#9492; ${esc(r.planningEntity)} <span style="font-size:10px;color:#89D1FF">(Planning Entity)</span></div>
         <div class="tags">
           <span class="tag tag-cloud">Cloud: ${esc(r.privateCloud)}</span>
           <span class="tag ${r.comboBase === 'Yes' ? 'tag-yes' : 'tag-no'}">Combo Base: ${esc(r.comboBase)}</span>
@@ -462,14 +462,14 @@
 
     out.innerHTML = `
       <div class="result-card" id="result">
-        <div class="result-title">Structure for Parent &mdash; ${esc(parent)}</div>
+        <div class="result-title">Structure for Global Ultimate &mdash; ${esc(parent)}</div>
         <div class="hierarchy">
           <div class="h-node">
-            <div class="h-label">Parent</div>
+            <div class="h-label">Global Ultimate</div>
             <div class="h-box parent highlight">${esc(parent)}</div>
           </div>
         </div>
-        <div class="result-title" style="margin-bottom:12px">${rows.length} Subsidiar${rows.length !== 1 ? 'ies' : 'y'}</div>
+        <div class="result-title" style="margin-bottom:12px">${rows.length} Business Partner${rows.length !== 1 ? 's' : ''}</div>
         <div class="children-grid">${children}</div>
       </div>`;
   }
@@ -483,18 +483,18 @@
         <div class="result-title">Full Hierarchy</div>
         <div class="hierarchy">
           <div class="h-node">
-            <div class="h-label">Parent</div>
+            <div class="h-label">Global Ultimate</div>
             <div class="h-box parent ${focus === 'parent' ? 'highlight' : ''}">${esc(row.parent)}</div>
           </div>
           <div class="h-arrow">&#8594;</div>
           <div class="h-node">
-            <div class="h-label">Subsidiary</div>
-            <div class="h-box sub ${focus === 'subsidiary' ? 'highlight' : ''}">${esc(row.subsidiary)}</div>
+            <div class="h-label">Planning Entity</div>
+            <div class="h-box sub ${focus === 'planningEntity' ? 'highlight' : ''}">${esc(row.planningEntity)}</div>
           </div>
           <div class="h-arrow">&#8594;</div>
           <div class="h-node">
-            <div class="h-label">Planning Entity</div>
-            <div class="h-box plan ${focus === 'planningEntity' ? 'highlight' : ''}">${esc(row.planningEntity)}</div>
+            <div class="h-label">Business Partner</div>
+            <div class="h-box plan ${focus === 'subsidiary' ? 'highlight' : ''}">${esc(row.subsidiary)}</div>
           </div>
         </div>
         <div class="attrs">
