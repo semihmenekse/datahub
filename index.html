@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Hub</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --border:    #2a2d3a;
+      --accent:    #6c63ff;
+      --accent2:   #00d4aa;
+      --text:      #e2e4ed;
+      --muted:     #7b7f94;
+      --danger:    #ff4f6a;
+      --warn:      #f5a623;
+      --green:     #3ecf8e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand { font-size: 18px; font-weight: 700; letter-spacing: .5px; }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── Layout ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+    /* ── Summary cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+    .card-value { font-size: 28px; font-weight: 700; }
+    .card-value.accent  { color: var(--accent); }
+    .card-value.accent2 { color: var(--accent2); }
+    .card-value.warn    { color: var(--warn); }
+    .card-value.green   { color: var(--green); }
+    .card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-title { font-size: 16px; font-weight: 600; }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap input {
+      width: 100%;
+      padding: 9px 12px 9px 36px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+    select {
+      padding: 9px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    select:focus { border-color: var(--accent); }
+    .btn {
+      padding: 9px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: opacity .2s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost   { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: #1e2133; }
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    th:hover { color: var(--text); }
+    th .sort-icon { margin-left: 4px; opacity: .5; }
+    th.asc  .sort-icon::after { content: ' ↑'; opacity: 1; }
+    th.desc .sort-icon::after { content: ' ↓'; opacity: 1; }
+    td {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:hover td { background: rgba(108,99,255,.05); }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green  { background: rgba(62,207,142,.15); color: var(--green); }
+    .badge-warn   { background: rgba(245,166,35,.15);  color: var(--warn); }
+    .badge-danger { background: rgba(255,79,106,.15); color: var(--danger); }
+    .badge-blue   { background: rgba(108,99,255,.2);  color: var(--accent); }
+    .badge-teal   { background: rgba(0,212,170,.15);  color: var(--accent2); }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── Cross-reference panel ── */
+    .xref-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 32px;
+    }
+    .xref-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--accent2); }
+    .xref-grid  { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+    .xref-item  {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .xref-item-title { font-size: 12px; font-weight: 600; margin-bottom: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; }
+    .xref-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; border-bottom: 1px solid var(--border); }
+    .xref-row:last-child { border-bottom: none; }
+    .xref-key   { color: var(--muted); }
+    .xref-val   { font-weight: 600; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      width: 520px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal h3 { font-size: 16px; margin-bottom: 20px; }
+    .form-row { margin-bottom: 14px; }
+    .form-row label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
+    .form-row input, .form-row select, .form-row textarea {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--accent); }
+    .form-row textarea { resize: vertical; min-height: 80px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .cards { grid-template-columns: repeat(2, 1fr); }
+      td, th { padding: 10px 10px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-brand">Data<span>Hub</span></div>
+  <div class="nav-links">
+    <a href="#records">Records</a>
+    <a href="#xref">Cross-Reference</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Summary Cards -->
+  <div class="cards" id="summary-cards">
+    <div class="card">
+      <div class="card-label">Total Records</div>
+      <div class="card-value accent" id="stat-total">0</div>
+      <div class="card-sub">across all categories</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Active</div>
+      <div class="card-value green" id="stat-active">0</div>
+      <div class="card-sub">status = active</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Pending</div>
+      <div class="card-value warn" id="stat-pending">0</div>
+      <div class="card-sub">needs attention</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Categories</div>
+      <div class="card-value accent2" id="stat-cats">0</div>
+      <div class="card-sub">distinct groups</div>
+    </div>
+  </div>
+
+  <!-- Records Table -->
+  <div id="records">
+    <div class="section-header">
+      <div class="section-title">Records</div>
+      <button class="btn btn-primary" onclick="openModal()">+ Add Record</button>
+    </div>
+
+    <div class="controls">
+      <div class="search-wrap">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" id="search-input" placeholder="Search any field..." oninput="renderTable()" />
+      </div>
+      <select id="filter-cat" onchange="renderTable()">
+        <option value="">All Categories</option>
+      </select>
+      <select id="filter-status" onchange="renderTable()">
+        <option value="">All Statuses</option>
+        <option value="Active">Active</option>
+        <option value="Pending">Pending</option>
+        <option value="Inactive">Inactive</option>
+        <option value="Review">Review</option>
+      </select>
+      <button class="btn btn-ghost" onclick="clearFilters()">Clear</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('name')"    data-col="name">    Name     <span class="sort-icon"></span></th>
+            <th onclick="sortBy('category')"data-col="category">Category <span class="sort-icon"></span></th>
+            <th onclick="sortBy('value')"   data-col="value">   Value    <span class="sort-icon"></span></th>
+            <th onclick="sortBy('status')"  data-col="status">  Status   <span class="sort-icon"></span></th>
+            <th onclick="sortBy('date')"    data-col="date">    Date     <span class="sort-icon"></span></th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Cross-Reference Panel -->
+  <div id="xref">
+    <div class="section-header">
+      <div class="section-title">Cross-Reference</div>
+    </div>
+    <div class="xref-panel">
+      <div class="xref-title">&#9654; Summary by Category</div>
+      <div class="xref-grid" id="xref-grid">
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="icon">&#128202;</div>
+          <p>Add records above to see cross-reference breakdowns here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <h3 id="modal-title">Add Record</h3>
+    <div class="form-row">
+      <label>Name *</label>
+      <input type="text" id="f-name" placeholder="e.g. Project Alpha" />
+    </div>
+    <div class="form-row">
+      <label>Category</label>
+      <input type="text" id="f-category" placeholder="e.g. Pricing, Account, Initiative..." list="cat-datalist" />
+      <datalist id="cat-datalist"></datalist>
+    </div>
+    <div class="form-row">
+      <label>Value</label>
+      <input type="text" id="f-value" placeholder="e.g. $150,000 or High" />
+    </div>
+    <div class="form-row">
+      <label>Status</label>
+      <select id="f-status">
+        <option value="Active">Active</option>
+        <option value="Pending">Pending</option>
+        <option value="Review">Review</option>
+        <option value="Inactive">Inactive</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Date</label>
+      <input type="date" id="f-date" />
+    </div>
+    <div class="form-row">
+      <label>Notes</label>
+      <textarea id="f-notes" placeholder="Any additional context..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRecord()">Save</button>
+    </div>
+  </div>
+</div>
+
+<footer>DataHub &mdash; built for Semih Menekse &bull; data persists in your browser</footer>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let records   = JSON.parse(localStorage.getItem('datahub_records') || '[]');
+  let sortCol   = 'date';
+  let sortDir   = -1; // -1 = desc
+  let editingId = null;
+
+  const BADGE = {
+    Active:   'badge-green',
+    Pending:  'badge-warn',
+    Inactive: 'badge-danger',
+    Review:   'badge-blue',
+  };
+
+  function persist() {
+    localStorage.setItem('datahub_records', JSON.stringify(records));
+  }
+
+  // ── Table rendering ────────────────────────────────────────────────────────
+  function filtered() {
+    const q   = document.getElementById('search-input').value.toLowerCase();
+    const cat = document.getElementById('filter-cat').value;
+    const st  = document.getElementById('filter-status').value;
+    return records.filter(r => {
+      const haystack = [r.name, r.category, r.value, r.status, r.date, r.notes].join(' ').toLowerCase();
+      return (!q || haystack.includes(q))
+          && (!cat || r.category === cat)
+          && (!st  || r.status   === st);
+    });
+  }
+
+  function sorted(rows) {
+    return [...rows].sort((a, b) => {
+      const av = (a[sortCol] || '').toString().toLowerCase();
+      const bv = (b[sortCol] || '').toString().toLowerCase();
+      return av < bv ? sortDir : av > bv ? -sortDir : 0;
+    });
+  }
+
+  function renderTable() {
+    const rows = sorted(filtered());
+    const tbody = document.getElementById('table-body');
+
+    if (!rows.length) {
+      tbody.innerHTML = `
+        <tr><td colspan="7">
+          <div class="empty-state">
+            <div class="icon">&#128193;</div>
+            <p>No records match your filters.</p>
+          </div>
+        </td></tr>`;
+      updateStats();
+      updateXRef();
+      return;
+    }
+
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><strong>${esc(r.name)}</strong></td>
+        <td><span class="badge badge-teal">${esc(r.category || '—')}</span></td>
+        <td>${esc(r.value || '—')}</td>
+        <td><span class="badge ${BADGE[r.status] || 'badge-blue'}">${esc(r.status)}</span></td>
+        <td>${esc(r.date || '—')}</td>
+        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+            title="${esc(r.notes || '')}">${esc(r.notes || '—')}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;margin-right:4px"
+                  onclick="editRecord('${r.id}')">Edit</button>
+          <button class="btn" style="padding:4px 10px;font-size:12px;background:rgba(255,79,106,.15);color:var(--danger);border:none"
+                  onclick="deleteRecord('${r.id}')">Del</button>
+        </td>
+      </tr>
+    `).join('');
+
+    updateStats();
+    updateXRef();
+    updateCategoryFilter();
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  function updateStats() {
+    const rows = filtered();
+    document.getElementById('stat-total').textContent   = rows.length;
+    document.getElementById('stat-active').textContent  = rows.filter(r => r.status === 'Active').length;
+    document.getElementById('stat-pending').textContent = rows.filter(r => r.status === 'Pending' || r.status === 'Review').length;
+    const cats = new Set(rows.map(r => r.category).filter(Boolean));
+    document.getElementById('stat-cats').textContent = cats.size;
+  }
+
+  // ── Cross-reference ────────────────────────────────────────────────────────
+  function updateXRef() {
+    const rows = filtered();
+    const bycat = {};
+    rows.forEach(r => {
+      const c = r.category || 'Uncategorized';
+      if (!bycat[c]) bycat[c] = { Active:0, Pending:0, Inactive:0, Review:0, total:0 };
+      bycat[c][r.status] = (bycat[c][r.status] || 0) + 1;
+      bycat[c].total++;
+    });
+
+    const grid = document.getElementById('xref-grid');
+    const cats = Object.keys(bycat);
+    if (!cats.length) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="icon">&#128202;</div>
+          <p>Add records above to see cross-reference breakdowns here.</p>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = cats.map(c => {
+      const d = bycat[c];
+      const rows = Object.entries(d)
+        .filter(([k]) => k !== 'total')
+        .filter(([,v]) => v > 0)
+        .map(([k, v]) => `
+          <div class="xref-row">
+            <span class="xref-key">${k}</span>
+            <span class="xref-val">${v}</span>
+          </div>`).join('');
+      return `
+        <div class="xref-item">
+          <div class="xref-item-title">${esc(c)} <span style="color:var(--accent);font-size:11px">(${d.total})</span></div>
+          ${rows}
+        </div>`;
+    }).join('');
+  }
+
+  // ── Category filter dropdown ───────────────────────────────────────────────
+  function updateCategoryFilter() {
+    const cats = [...new Set(records.map(r => r.category).filter(Boolean))].sort();
+    const sel  = document.getElementById('filter-cat');
+    const cur  = sel.value;
+    sel.innerHTML = '<option value="">All Categories</option>'
+      + cats.map(c => `<option value="${esc(c)}" ${c === cur ? 'selected' : ''}>${esc(c)}</option>`).join('');
+
+    const dl = document.getElementById('cat-datalist');
+    dl.innerHTML = cats.map(c => `<option value="${esc(c)}"></option>`).join('');
+  }
+
+  // ── Sort ───────────────────────────────────────────────────────────────────
+  function sortBy(col) {
+    if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
+    document.querySelectorAll('th').forEach(th => {
+      th.classList.remove('asc','desc');
+      if (th.dataset.col === col) th.classList.add(sortDir === 1 ? 'asc' : 'desc');
+    });
+    renderTable();
+  }
+
+  // ── Filters ────────────────────────────────────────────────────────────────
+  function clearFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-cat').value   = '';
+    document.getElementById('filter-status').value = '';
+    renderTable();
+  }
+
+  // ── Modal ──────────────────────────────────────────────────────────────────
+  function openModal(id = null) {
+    editingId = id;
+    document.getElementById('modal-title').textContent = id ? 'Edit Record' : 'Add Record';
+    if (id) {
+      const r = records.find(x => x.id === id);
+      document.getElementById('f-name').value     = r.name     || '';
+      document.getElementById('f-category').value = r.category || '';
+      document.getElementById('f-value').value    = r.value    || '';
+      document.getElementById('f-status').value   = r.status   || 'Active';
+      document.getElementById('f-date').value     = r.date     || '';
+      document.getElementById('f-notes').value    = r.notes    || '';
+    } else {
+      ['f-name','f-category','f-value','f-notes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('f-status').value = 'Active';
+      document.getElementById('f-date').value   = new Date().toISOString().split('T')[0];
+    }
+    document.getElementById('modal-overlay').classList.add('open');
+    document.getElementById('f-name').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    editingId = null;
+  }
+
+  function closeModalOnOverlay(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  // ── CRUD ───────────────────────────────────────────────────────────────────
+  function saveRecord() {
+    const name = document.getElementById('f-name').value.trim();
+    if (!name) { document.getElementById('f-name').focus(); return; }
+    const rec = {
+      id:       editingId || crypto.randomUUID(),
+      name,
+      category: document.getElementById('f-category').value.trim(),
+      value:    document.getElementById('f-value').value.trim(),
+      status:   document.getElementById('f-status').value,
+      date:     document.getElementById('f-date').value,
+      notes:    document.getElementById('f-notes').value.trim(),
+    };
+    if (editingId) {
+      records = records.map(r => r.id === editingId ? rec : r);
+    } else {
+      records.unshift(rec);
+    }
+    persist();
+    closeModal();
+    renderTable();
+  }
+
+  function editRecord(id)   { openModal(id); }
+
+  function deleteRecord(id) {
+    if (!confirm('Delete this record?')) return;
+    records = records.filter(r => r.id !== id);
+    persist();
+    renderTable();
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  renderTable();
+</script>
+</body>
+</html>
