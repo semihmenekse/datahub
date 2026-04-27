@@ -8,7 +8,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: #ffffff;
+      background: #f5f6fa;
       color: #1a1d27;
       font-family: 'Segoe UI', system-ui, sans-serif;
       font-size: 14px;
@@ -24,23 +24,42 @@
     }
     nav span { color: #6c63ff; }
 
-    .container { max-width: 1100px; margin: 40px auto; padding: 0 24px; }
-
-    .controls {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
+    .page {
+      max-width: 720px;
+      margin: 56px auto;
+      padding: 0 24px;
     }
 
-    .search-wrap {
-      position: relative;
-      flex: 1;
-      min-width: 220px;
+    .headline {
+      text-align: center;
+      margin-bottom: 36px;
     }
-    .search-wrap input {
+    .headline h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    .headline p  { color: #6b7280; font-size: 14px; }
+
+    /* ── Search card ── */
+    .search-card {
+      background: #fff;
+      border: 1px solid #e0e2ed;
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 32px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: #6b7280;
+      margin-bottom: 7px;
+    }
+
+    .field { margin-bottom: 18px; position: relative; }
+
+    .field input {
       width: 100%;
-      padding: 11px 16px 11px 40px;
+      padding: 12px 14px;
       border: 1.5px solid #e0e2ed;
       border-radius: 10px;
       font-size: 14px;
@@ -49,20 +68,37 @@
       outline: none;
       transition: border-color .2s;
     }
-    .search-wrap input:focus { border-color: #6c63ff; }
-    .search-wrap input::placeholder { color: #9ca3af; }
-    .search-icon {
+    .field input:focus { border-color: #6c63ff; }
+    .field input::placeholder { color: #b0b4c1; }
+
+    /* autocomplete dropdown */
+    .suggestions {
       position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      font-size: 15px;
-      pointer-events: none;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: #fff;
+      border: 1.5px solid #e0e2ed;
+      border-radius: 10px;
+      z-index: 50;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+      overflow: hidden;
+      display: none;
     }
+    .suggestions.open { display: block; }
+    .suggestion-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f1f7;
+      transition: background .1s;
+    }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover, .suggestion-item.active { background: #f3f2ff; color: #6c63ff; }
+    .suggestion-item .s-type { font-size: 10px; color: #9ca3af; margin-left: 6px; text-transform: uppercase; }
 
     select {
-      padding: 11px 40px 11px 14px;
+      width: 100%;
+      padding: 12px 40px 12px 14px;
       border: 1.5px solid #e0e2ed;
       border-radius: 10px;
       font-size: 14px;
@@ -71,69 +107,147 @@
       outline: none;
       cursor: pointer;
       appearance: none;
-      min-width: 200px;
       transition: border-color .2s;
     }
     select:focus { border-color: #6c63ff; }
 
-    .result-count { font-size: 12px; color: #6b7280; margin-bottom: 10px; }
+    .btn-search {
+      width: 100%;
+      padding: 13px;
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+      margin-top: 4px;
+    }
+    .btn-search:hover { opacity: .88; }
 
-    .table-wrap {
+    /* ── Result ── */
+    #result { animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .result-card {
+      background: #fff;
       border: 1px solid #e0e2ed;
-      border-radius: 12px;
-      overflow: hidden;
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 16px;
     }
 
-    table { width: 100%; border-collapse: collapse; }
-    thead tr { background: #f5f6fa; }
-    th {
-      padding: 11px 16px;
-      text-align: left;
+    .result-title {
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: .8px;
       color: #6b7280;
-      cursor: pointer;
-      user-select: none;
-      white-space: nowrap;
+      margin-bottom: 20px;
     }
-    th:hover { color: #1a1d27; }
-    th.asc::after  { content: ' ↑'; }
-    th.desc::after { content: ' ↓'; }
 
-    td {
-      padding: 12px 16px;
-      border-top: 1px solid #e0e2ed;
-      vertical-align: middle;
+    /* hierarchy row */
+    .hierarchy {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 4px;
     }
-    tr:hover td { background: #f9f9ff; }
-
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 11px;
+    .h-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .h-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: #9ca3af;
+      margin-bottom: 6px;
       font-weight: 600;
     }
-    .badge-yes { background: #e0f7ee; color: #059669; }
-    .badge-no  { background: #fef2f2; color: #e53e3e; }
-    .badge-na  { background: #f3f4f6; color: #6b7280; }
+    .h-box {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      border: 2px solid transparent;
+    }
+    .h-box.parent    { background: #fff7ed; border-color: #fbbf24; color: #92400e; }
+    .h-box.sub       { background: #ede9ff; border-color: #8b5cf6; color: #4c1d95; }
+    .h-box.plan      { background: #ecfdf5; border-color: #34d399; color: #065f46; }
+    .h-box.highlight { box-shadow: 0 0 0 3px rgba(108,99,255,.25); }
 
-    .empty-state {
+    .h-arrow {
+      font-size: 20px;
+      color: #d1d5db;
+      margin: 0 4px;
+      padding-top: 20px;
+    }
+
+    /* attributes */
+    .attrs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      border-top: 1px solid #f0f1f7;
+      padding-top: 20px;
+    }
+    .attr {
+      background: #f9f9ff;
+      border: 1px solid #e8e9f5;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .attr-label { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: #9ca3af; font-weight: 600; margin-bottom: 5px; }
+    .attr-value { font-size: 14px; font-weight: 600; }
+
+    .badge-yes { color: #059669; }
+    .badge-no  { color: #e53e3e; }
+    .badge-na  { color: #6b7280; }
+
+    /* parent result — lists all children */
+    .children-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .child-card {
+      background: #f9f9ff;
+      border: 1px solid #e8e9f5;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .child-card .sub-name  { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+    .child-card .plan-name { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+    .child-card .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .tag-cloud  { background: #ede9ff; color: #6c63ff; }
+    .tag-yes    { background: #e0f7ee; color: #059669; }
+    .tag-no     { background: #fef2f2; color: #e53e3e; }
+
+    .no-result {
       text-align: center;
-      padding: 56px 16px;
+      padding: 40px;
       color: #9ca3af;
     }
-    .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+    .no-result .icon { font-size: 32px; margin-bottom: 10px; }
 
     footer {
       text-align: center;
       padding: 32px;
       color: #9ca3af;
       font-size: 12px;
-      border-top: 1px solid #e0e2ed;
-      margin-top: 64px;
+      margin-top: 32px;
     }
   </style>
 </head>
@@ -141,44 +255,41 @@
 
 <nav>Entity<span>Hub</span></nav>
 
-<div class="container">
+<div class="page">
 
-  <div class="controls">
-    <div class="search-wrap">
-      <span class="search-icon">&#128269;</span>
-      <input type="text" id="search-input" placeholder="Search entities..." oninput="renderTable()" />
+  <div class="headline">
+    <h1>Entity Structure Lookup</h1>
+    <p>Type a name, select its type, and see the full hierarchy.</p>
+  </div>
+
+  <div class="search-card">
+    <div class="field">
+      <div class="field-label">Entity Name</div>
+      <input type="text" id="search-input" placeholder="e.g. Coca Cola, Sub 1, Plan 2..."
+             oninput="onSearchInput()" onkeydown="onKeyDown(event)" autocomplete="off" />
+      <div class="suggestions" id="suggestions"></div>
     </div>
-    <select id="filter-type" onchange="renderTable()">
-      <option value="">All Types</option>
-      <option value="Subsidiary">Subsidiary</option>
-      <option value="Planning Entity">Planning Entity</option>
-      <option value="Parent">Parent</option>
-    </select>
+    <div class="field">
+      <div class="field-label">Entity Type</div>
+      <select id="filter-type">
+        <option value="">— Select type —</option>
+        <option value="Parent">Parent</option>
+        <option value="Subsidiary">Subsidiary</option>
+        <option value="Planning Entity">Planning Entity</option>
+      </select>
+    </div>
+    <button class="btn-search" onclick="lookup()">Look Up Structure</button>
   </div>
 
-  <div class="result-count" id="result-count"></div>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th onclick="sortBy('subsidiary')"  id="th-subsidiary"> Subsidiary</th>
-          <th onclick="sortBy('planningEntity')" id="th-planningEntity">Planning Entity</th>
-          <th onclick="sortBy('parent')"       id="th-parent">     Parent</th>
-          <th onclick="sortBy('privateCloud')" id="th-privateCloud">Private Cloud Owner</th>
-          <th onclick="sortBy('comboBase')"    id="th-comboBase">   Owns Combo Base?</th>
-        </tr>
-      </thead>
-      <tbody id="table-body"></tbody>
-    </table>
-  </div>
+  <div id="result"></div>
 
 </div>
 
 <footer>EntityHub</footer>
 
 <script>
-  const records = [
+  /* ── Data (backend) ───────────────────────────────────────────────────── */
+  const DATA = [
     { subsidiary: "Sub 1",  planningEntity: "Plan 1",   parent: "Coca Cola", privateCloud: "Plan 1", comboBase: "Yes" },
     { subsidiary: "Sub 2",  planningEntity: "Plan 2",   parent: "Coca Cola", privateCloud: "Plan 1", comboBase: "No"  },
     { subsidiary: "Sub 3",  planningEntity: "Plan 3",   parent: "Coca Cola", privateCloud: "Plan 1", comboBase: "No"  },
@@ -189,74 +300,168 @@
     { subsidiary: "ABC 4",  planningEntity: "Entity 4", parent: "Pepsi",     privateCloud: "NA",     comboBase: "No"  },
   ];
 
-  let sortCol = '';
-  let sortDir = 1;
+  /* ── All searchable names ─────────────────────────────────────────────── */
+  const ALL_NAMES = [
+    ...new Set([
+      ...DATA.map(r => ({ name: r.parent,         type: 'Parent' })),
+      ...DATA.map(r => ({ name: r.subsidiary,      type: 'Subsidiary' })),
+      ...DATA.map(r => ({ name: r.planningEntity,  type: 'Planning Entity' })),
+    ].map(JSON.stringify))
+  ].map(JSON.parse);
 
-  function filtered() {
-    const q = document.getElementById('search-input').value.toLowerCase();
-    const t = document.getElementById('filter-type').value;
-    return records.filter(r => {
-      const hay = Object.values(r).join(' ').toLowerCase();
-      if (q && !hay.includes(q)) return false;
-      if (t === 'Subsidiary')      return r.subsidiary.toLowerCase().includes(q || '');
-      if (t === 'Planning Entity') return r.planningEntity.toLowerCase().includes(q || '');
-      if (t === 'Parent')          return r.parent.toLowerCase().includes(q || '');
-      return true;
-    });
+  /* ── Autocomplete ─────────────────────────────────────────────────────── */
+  let activeIdx = -1;
+
+  function onSearchInput() {
+    const q = document.getElementById('search-input').value.toLowerCase().trim();
+    const box = document.getElementById('suggestions');
+    activeIdx = -1;
+    if (!q) { box.classList.remove('open'); return; }
+
+    const matches = ALL_NAMES.filter(n => n.name.toLowerCase().includes(q)).slice(0, 8);
+    if (!matches.length) { box.classList.remove('open'); return; }
+
+    box.innerHTML = matches.map((m, i) =>
+      `<div class="suggestion-item" data-idx="${i}" data-name="${esc(m.name)}" data-type="${esc(m.type)}"
+            onclick="pickSuggestion('${esc(m.name)}','${esc(m.type)}')">
+        ${esc(m.name)}<span class="s-type">${esc(m.type)}</span>
+      </div>`
+    ).join('');
+    box.classList.add('open');
   }
 
-  function sorted(rows) {
-    if (!sortCol) return rows;
-    return [...rows].sort((a, b) => {
-      const av = (a[sortCol] || '').toLowerCase();
-      const bv = (b[sortCol] || '').toLowerCase();
-      return av < bv ? -sortDir : av > bv ? sortDir : 0;
-    });
+  function onKeyDown(e) {
+    const box = document.getElementById('suggestions');
+    const items = box.querySelectorAll('.suggestion-item');
+    if (!box.classList.contains('open') || !items.length) return;
+    if (e.key === 'ArrowDown') { activeIdx = Math.min(activeIdx + 1, items.length - 1); highlight(items); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { activeIdx = Math.max(activeIdx - 1, 0); highlight(items); e.preventDefault(); }
+    else if (e.key === 'Enter' && activeIdx >= 0) {
+      const it = items[activeIdx];
+      pickSuggestion(it.dataset.name, it.dataset.type);
+    } else if (e.key === 'Escape') { box.classList.remove('open'); }
   }
 
-  function comboBadge(v) {
-    if (v === 'Yes') return 'badge-yes';
-    if (v === 'No')  return 'badge-no';
-    return 'badge-na';
+  function highlight(items) {
+    items.forEach((it, i) => it.classList.toggle('active', i === activeIdx));
   }
 
-  function renderTable() {
-    const rows  = sorted(filtered());
-    const tbody = document.getElementById('table-body');
-    const count = document.getElementById('result-count');
+  function pickSuggestion(name, type) {
+    document.getElementById('search-input').value = name;
+    document.getElementById('filter-type').value  = type;
+    document.getElementById('suggestions').classList.remove('open');
+    lookup();
+  }
 
-    count.textContent = rows.length + ' result' + (rows.length !== 1 ? 's' : '');
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.field')) document.getElementById('suggestions').classList.remove('open');
+  });
 
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">&#128203;</div><p>No entities found.</p></div></td></tr>`;
+  /* ── Lookup ───────────────────────────────────────────────────────────── */
+  function lookup() {
+    const name = document.getElementById('search-input').value.trim();
+    const type = document.getElementById('filter-type').value;
+    const out  = document.getElementById('result');
+
+    if (!name || !type) {
+      out.innerHTML = `<div class="no-result"><div class="icon">&#9888;&#65039;</div><p>Please enter a name and select a type.</p></div>`;
       return;
     }
 
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td><strong>${esc(r.subsidiary)}</strong></td>
-        <td>${esc(r.planningEntity)}</td>
-        <td>${esc(r.parent)}</td>
-        <td>${esc(r.privateCloud)}</td>
-        <td><span class="badge ${comboBadge(r.comboBase)}">${esc(r.comboBase)}</span></td>
-      </tr>
-    `).join('');
+    const q = name.toLowerCase();
+
+    if (type === 'Parent') {
+      const rows = DATA.filter(r => r.parent.toLowerCase() === q);
+      if (!rows.length) { noResult(out, name, type); return; }
+      renderParent(out, rows);
+
+    } else if (type === 'Subsidiary') {
+      const row = DATA.find(r => r.subsidiary.toLowerCase() === q);
+      if (!row) { noResult(out, name, type); return; }
+      renderSingle(out, row, 'subsidiary');
+
+    } else if (type === 'Planning Entity') {
+      const row = DATA.find(r => r.planningEntity.toLowerCase() === q);
+      if (!row) { noResult(out, name, type); return; }
+      renderSingle(out, row, 'planningEntity');
+    }
   }
 
-  function sortBy(col) {
-    sortDir = sortCol === col ? sortDir * -1 : 1;
-    sortCol = col;
-    document.querySelectorAll('th').forEach(th => th.className = '');
-    const th = document.getElementById('th-' + col);
-    if (th) th.className = sortDir === 1 ? 'asc' : 'desc';
-    renderTable();
+  /* ── Render: Parent view ─────────────────────────────────────────────── */
+  function renderParent(out, rows) {
+    const parent = rows[0].parent;
+    const children = rows.map(r => `
+      <div class="child-card">
+        <div class="sub-name">${esc(r.subsidiary)}</div>
+        <div class="plan-name">&#9492; ${esc(r.planningEntity)}</div>
+        <div class="tags">
+          <span class="tag tag-cloud">Cloud: ${esc(r.privateCloud)}</span>
+          <span class="tag ${r.comboBase === 'Yes' ? 'tag-yes' : 'tag-no'}">Combo Base: ${esc(r.comboBase)}</span>
+        </div>
+      </div>
+    `).join('');
+
+    out.innerHTML = `
+      <div class="result-card" id="result">
+        <div class="result-title">Structure for Parent &mdash; ${esc(parent)}</div>
+        <div class="hierarchy">
+          <div class="h-node">
+            <div class="h-label">Parent</div>
+            <div class="h-box parent highlight">${esc(parent)}</div>
+          </div>
+        </div>
+        <div class="result-title" style="margin-bottom:12px">${rows.length} Subsidiar${rows.length !== 1 ? 'ies' : 'y'}</div>
+        <div class="children-grid">${children}</div>
+      </div>`;
+  }
+
+  /* ── Render: Subsidiary or Planning Entity view ──────────────────────── */
+  function renderSingle(out, row, focus) {
+    const comboClass = row.comboBase === 'Yes' ? 'badge-yes' : row.comboBase === 'No' ? 'badge-no' : 'badge-na';
+
+    out.innerHTML = `
+      <div class="result-card" id="result">
+        <div class="result-title">Full Hierarchy</div>
+        <div class="hierarchy">
+          <div class="h-node">
+            <div class="h-label">Parent</div>
+            <div class="h-box parent ${focus === 'parent' ? 'highlight' : ''}">${esc(row.parent)}</div>
+          </div>
+          <div class="h-arrow">&#8594;</div>
+          <div class="h-node">
+            <div class="h-label">Subsidiary</div>
+            <div class="h-box sub ${focus === 'subsidiary' ? 'highlight' : ''}">${esc(row.subsidiary)}</div>
+          </div>
+          <div class="h-arrow">&#8594;</div>
+          <div class="h-node">
+            <div class="h-label">Planning Entity</div>
+            <div class="h-box plan ${focus === 'planningEntity' ? 'highlight' : ''}">${esc(row.planningEntity)}</div>
+          </div>
+        </div>
+        <div class="attrs">
+          <div class="attr">
+            <div class="attr-label">Private Cloud Owner</div>
+            <div class="attr-value">${esc(row.privateCloud)}</div>
+          </div>
+          <div class="attr">
+            <div class="attr-label">Owns Combo Base?</div>
+            <div class="attr-value ${comboClass}">${esc(row.comboBase)}</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function noResult(out, name, type) {
+    out.innerHTML = `
+      <div class="no-result">
+        <div class="icon">&#128269;</div>
+        <p>No ${esc(type)} found matching <strong>"${esc(name)}"</strong>.</p>
+      </div>`;
   }
 
   function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
-
-  renderTable();
 </script>
 </body>
 </html>
