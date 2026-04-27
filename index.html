@@ -428,16 +428,8 @@
   /* ── Render: Parent view ─────────────────────────────────────────────── */
   function renderParent(out, rows) {
     const parent = rows[0].parent;
-    const children = rows.map(r => `
-      <div class="child-card">
-        <div class="sub-name">${esc(r.subsidiary)}</div>
-        <div class="plan-name">&#9492; ${esc(r.planningEntity)}</div>
-        <div class="tags">
-          <span class="tag tag-cloud">Cloud: ${esc(r.privateCloud)}</span>
-          <span class="tag ${r.comboBase === 'Yes' ? 'tag-yes' : 'tag-no'}">Combo Base: ${esc(r.comboBase)}</span>
-        </div>
-      </div>
-    const rec = getRecommendation(r);
+    const children = rows.map(r => {
+      const rec = getRecommendation(r);
       return `
       <div class="child-card">
         <div class="sub-name">${esc(r.subsidiary)}</div>
@@ -451,6 +443,7 @@
           <div class="rec-value ${rec.cls}" style="font-size:13px">${rec.value}</div>
         </div>
       </div>`;
+    }).join('');
 
     out.innerHTML = `
       <div class="result-card" id="result">
