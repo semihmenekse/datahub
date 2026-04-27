@@ -271,6 +271,21 @@
 </head>
 <body>
 
+<!-- Email Gate -->
+<div id="gate" style="position:fixed;inset:0;background:#D1EFFF;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#FFFFFF;border:1px solid #89D1FF;border-radius:14px;padding:40px 36px;width:380px;text-align:center;box-shadow:0 4px 24px rgba(0,112,242,.12);">
+    <input type="email" id="gate-input" placeholder="Enter your SAP email"
+      style="width:100%;padding:12px 14px;border:1.5px solid #89D1FF;border-radius:10px;font-size:14px;color:#00144A;outline:none;margin-bottom:12px;transition:border-color .2s;"
+      onkeydown="if(event.key==='Enter')checkEmail()"
+      onfocus="this.style.borderColor='#0070F2'" onblur="this.style.borderColor='#89D1FF'" />
+    <div id="gate-error" style="color:#e53e3e;font-size:12px;margin-bottom:10px;display:none;">Access denied. Unauthorized email.</div>
+    <button onclick="checkEmail()"
+      style="width:100%;padding:12px;background:#0070F2;color:#FFFFFF;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">
+      Enter
+    </button>
+  </div>
+</div>
+
 <nav>2-Tier Scenario<span> Checks</span></nav>
 
 <div class="page">
@@ -502,6 +517,23 @@
         <div class="icon">&#128269;</div>
         <p>No ${esc(type)} found matching <strong>"${esc(name)}"</strong>.</p>
       </div>`;
+  }
+
+  const ALLOWED = ['semih.menekse@sap.com'];
+
+  function checkEmail() {
+    const val = document.getElementById('gate-input').value.trim().toLowerCase();
+    if (ALLOWED.includes(val)) {
+      document.getElementById('gate').style.display = 'none';
+      sessionStorage.setItem('auth', val);
+    } else {
+      document.getElementById('gate-error').style.display = 'block';
+      document.getElementById('gate-input').value = '';
+      document.getElementById('gate-input').focus();
+    }
+  }
+  if (ALLOWED.includes(sessionStorage.getItem('auth'))) {
+    document.getElementById('gate').style.display = 'none';
   }
 
   function esc(s) {
