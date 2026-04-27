@@ -236,6 +236,23 @@
     .tag-yes    { background: #e53e3e; color: #FFFFFF; }
     .tag-no     { background: #059669; color: #FFFFFF; }
 
+    /* recommendation box */
+    .rec-box {
+      margin-top: 20px;
+      border-radius: 10px;
+      padding: 16px 18px;
+      border: 2px solid;
+    }
+    .rec-box.rec-yes  { background: #fff0f0; border-color: #e53e3e; }
+    .rec-box.rec-no   { background: #f0fff7; border-color: #059669; }
+    .rec-box.rec-na   { background: #f0f6ff; border-color: #89D1FF; }
+    .rec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; color: #002A86; }
+    .rec-value { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .rec-value.rec-yes { color: #e53e3e; }
+    .rec-value.rec-no  { color: #059669; }
+    .rec-value.rec-na  { color: #1B90FF; }
+    .rec-reason { font-size: 12px; color: #002A86; }
+
     .no-result {
       text-align: center;
       padding: 40px;
@@ -388,6 +405,26 @@
     }
   }
 
+  function getRecommendation(row) {
+    const hasPrivateCloud = row.privateCloud !== 'NA';
+    if (!hasPrivateCloud) {
+      return { cls: 'rec-na', value: 'Not Eligible', reason: 'No private cloud ownership found in this hierarchy.' };
+    }
+    const canPurchase = row.comboBase !== 'Yes';
+    return canPurchase
+      ? { cls: 'rec-no',  value: 'Can Purchase 2-Tier Combo Base', reason: 'Private cloud is owned in this hierarchy (' + row.privateCloud + '). This subsidiary is eligible to purchase 2-Tier Combo Base.' }
+      : { cls: 'rec-yes', value: 'Already Owns Combo Base',        reason: 'This subsidiary already owns Combo Base. No additional purchase needed.' };
+  }
+
+  function recHTML(row) {
+    const r = getRecommendation(row);
+    return `<div class="rec-box ${r.cls}">
+      <div class="rec-label">2-Tier Combo Base Recommendation</div>
+      <div class="rec-value ${r.cls}">${r.value}</div>
+      <div class="rec-reason">${r.reason}</div>
+    </div>`;
+  }
+
   /* ── Render: Parent view ─────────────────────────────────────────────── */
   function renderParent(out, rows) {
     const parent = rows[0].parent;
@@ -400,7 +437,20 @@
           <span class="tag ${r.comboBase === 'Yes' ? 'tag-yes' : 'tag-no'}">Combo Base: ${esc(r.comboBase)}</span>
         </div>
       </div>
-    `).join('');
+    const rec = getRecommendation(r);
+      return `
+      <div class="child-card">
+        <div class="sub-name">${esc(r.subsidiary)}</div>
+        <div class="plan-name">&#9492; ${esc(r.planningEntity)}</div>
+        <div class="tags">
+          <span class="tag tag-cloud">Cloud: ${esc(r.privateCloud)}</span>
+          <span class="tag ${r.comboBase === 'Yes' ? 'tag-yes' : 'tag-no'}">Combo Base: ${esc(r.comboBase)}</span>
+        </div>
+        <div class="rec-box ${rec.cls}" style="margin-top:10px;padding:10px 12px;">
+          <div class="rec-label">Recommendation</div>
+          <div class="rec-value ${rec.cls}" style="font-size:13px">${rec.value}</div>
+        </div>
+      </div>`;
 
     out.innerHTML = `
       <div class="result-card" id="result">
@@ -449,6 +499,7 @@
             <div class="attr-value ${comboClass}">${esc(row.comboBase)}</div>
           </div>
         </div>
+        ${recHTML(row)}
       </div>`;
   }
 
