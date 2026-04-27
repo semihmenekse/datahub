@@ -421,14 +421,11 @@
   }
 
   function getRecommendation(row) {
-    const hasPrivateCloud = row.privateCloud !== 'NA';
-    if (!hasPrivateCloud) {
-      return { cls: 'rec-na', value: 'Not Eligible', reason: 'No private cloud ownership found in this hierarchy.' };
-    }
-    const canPurchase = row.comboBase !== 'Yes';
-    return canPurchase
-      ? { cls: 'rec-no',  value: 'Can Purchase 2-Tier Combo Base', reason: 'Private cloud is owned in this hierarchy (' + row.privateCloud + '). This subsidiary is eligible to purchase 2-Tier Combo Base.' }
-      : { cls: 'rec-yes', value: 'Already Owns Combo Base',        reason: 'This subsidiary already owns Combo Base. No additional purchase needed.' };
+    const cloud = (row.privateCloud || '').toUpperCase().trim();
+    const hasPCEorPTO = cloud === 'PCE' || cloud === 'PTO';
+    return hasPCEorPTO
+      ? { cls: 'rec-no',  value: 'Can Purchase 2-Tier Combo Base', reason: 'A PCE or PTO is present in this hierarchy (' + row.privateCloud + '). This Business Partner is eligible to purchase 2-Tier Combo Base.' }
+      : { cls: 'rec-yes', value: 'Position Combo Base',            reason: 'No PCE or PTO found in this hierarchy. Standard Combo Base positioning applies.' };
   }
 
   function recHTML(row) {
