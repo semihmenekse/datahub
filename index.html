@@ -471,9 +471,10 @@
   function getRecommendation(row) {
     const cloud = (row.privateCloud || '').toUpperCase().trim();
     const hasPCEorPTO = cloud === 'PCE' || cloud === 'PTO';
-    return hasPCEorPTO
-      ? { cls: 'rec-no',  value: 'Can Purchase 2-Tier Combo Base', reason: 'A PCE or PTO is present in this hierarchy (' + row.privateCloud + '). This Business Partner is eligible to purchase 2-Tier Combo Base.' }
-      : { cls: 'rec-yes', value: 'Position Combo Base',            reason: 'No PCE or PTO found in this hierarchy. Standard Combo Base positioning applies.' };
+    const ownsComboBase = (row.comboBase || '').toUpperCase() === 'YES';
+    return (hasPCEorPTO && ownsComboBase)
+      ? { cls: 'rec-no',  value: 'Can Purchase 2-Tier Combo Base', reason: 'A PCE or PTO is present in this hierarchy (' + row.privateCloud + ') and this Business Partner owns Combo Base. They are eligible to purchase 2-Tier Combo Base.' }
+      : { cls: 'rec-yes', value: 'Position Combo Base',            reason: 'Standard Combo Base positioning applies.' };
   }
 
   function recHTML(row) {
